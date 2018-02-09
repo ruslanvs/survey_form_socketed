@@ -3,17 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <title>Survey Form</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        $( document ).ready( function(){
+            var socket = io.connect();
+            $( "#survey_form" ).submit( function(e){
+                socket.emit( "form_submit", {
+                    name: $("#name").val(),
+                    location: $("#location").val(),
+                    language: $("#language").val(),
+                    comment: $("#comment").val(),
+                }),
+                e.preventDefault();
+
+            });
+            socket.on( "server_response", function( data ){
+                // console.log( data ),
+                document.getElementById( "server_message" ).innerHTML = `
+                    <p> You emitted the following information to the server: ${data.response.name}, ${data.response.location}, ${data.response.language}, ${data.response.comment}. Your lucky number emitted by the server is ${data.response.lucky_nr}.</p>`
+            });
+        })
+    </script>
 </head>
 <body>
 
-    <form action="/surveys/create" method="POST">
-        <input type="text" name="name" placeholder="Your Name">
+
+    <div id="server_message"></div>
+
+    <form id="survey_form">
+        <input type="text" name="name" id="name" placeholder="Your Name">
         <div></div>
-        <input type="text" name="location" placeholder="Dojo Location">
+        <input type="text" name="location" id="location" placeholder="Dojo Location">
         <div></div>
-        <input type="text" name="language" placeholder="Javascript">
+        <input type="text" name="language" id="language" placeholder="Javascript">
         <div></div>
-        <textarea name="comment" id="" placeholder="Comment(optional):"></textarea>
+        <textarea name="comment" id="comment" placeholder="Comment(optional):"></textarea>
         <div></div>
         <input type="submit" value="Submit">
     </form>
